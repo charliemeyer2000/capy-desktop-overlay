@@ -1,0 +1,44 @@
+name: Update Capy desktop versions
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: DeterminateSystems/nix-installer-action@main
+
+      - name: Check for new version
+        id: check
+        run: |
+          chmod +x update.sh
+          OUTPUT=$(./update.sh)
+          echo "$OUTPUT"
+          if echo "$OUTPUT" | grep -q "New version"; then
+            echo "new_version=true" >> "$GITHUB_OUTPUT"
+            VERSION=$(echo "$OUTPUT" | grep "New version" | sed 's/New version: //')
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Verify build
+        if: steps.check.outputs.new_version == 'true'
+        run: |
+          git add versions/
+          nix build .#capy-desktop
+          codesign --verify --deep --strict result/Applications/Capy.app
+
+      - name: Commit and push
+        if: steps.check.outputs.new_version == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add versions/
+          git commit -m "feat: track capy-desktop ${{ steps.check.outputs.version }}"
+          git push
