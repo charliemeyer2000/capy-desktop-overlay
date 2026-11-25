@@ -1,0 +1,9 @@
+{
+  "version": "0.10.0",
+  "platforms": {
+    "aarch64-darwin": {
+      "url": "https://downloads.capy.ai/stable/Capy-0.10.0-arm64.dmg",
+      "hash": "sha512-XWoKeCOuubtTy40BUfpoc9V8x6OalaKqb4r+d3Mc1nnfAC7FRUECBr6z+fdihmWf554ZVUdoc/lfCFzJmtEUbw=="
+    }
+  }
+}
